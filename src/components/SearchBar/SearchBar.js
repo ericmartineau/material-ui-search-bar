@@ -63,6 +63,20 @@ export default class SearchBar extends Component {
       value: this.props.value,
       active: false
     }
+
+    this.searchInput = null;
+    this.updateInputRef = el=> {
+      this.searchInput = el;
+      if (this.props.inputRef) {
+        this.props.inputRef(el);
+      }
+    }
+  }
+
+  focus() {
+    if (this.searchInput) {
+      this.searchInput.focus();
+    }
   }
 
   componentWillReceiveProps (nextProps) {
@@ -73,6 +87,7 @@ export default class SearchBar extends Component {
 
   handleFocus = () => {
     this.setState({focus: true})
+    this.props.onFocus && this.props.onFocus()
   }
 
   handleBlur = () => {
@@ -80,6 +95,7 @@ export default class SearchBar extends Component {
     if (this.state.value.trim().length === 0) {
       this.setState({value: ''})
     }
+    this.props.onBlur && this.props.onBlur();
   }
 
   handleInput = (e) => {
@@ -106,6 +122,7 @@ export default class SearchBar extends Component {
       disabled,
       onRequestSearch, // eslint-disable-line
       searchIcon,
+      onKeyDown,
       style,
       ...inputProps
     } = this.props
@@ -121,9 +138,11 @@ export default class SearchBar extends Component {
           <Input
             {...inputProps}
             onBlur={this.handleBlur}
+            inputRef={this.updateInputRef}
             value={value}
             onChange={this.handleInput}
             onKeyUp={this.handleKeyPressed}
+            onKeyDown={onKeyDown}
             onFocus={this.handleFocus}
             fullWidth
             style={styles.input}
@@ -159,7 +178,6 @@ SearchBar.defaultProps = {
 }
 
 SearchBar.propTypes = {
-  /** Override the close icon. */
   closeIcon: PropTypes.node,
   /** Disables text field. */
   disabled: PropTypes.bool,
@@ -167,6 +185,12 @@ SearchBar.propTypes = {
   placeholder: PropTypes.string,
   /** Fired when the text value changes. */
   onChange: PropTypes.func,
+  /** Fired when a keydown event occurs in the text box. */
+  onKeyDown: PropTypes.func,
+  /** Fired when focus leaves the search box. */
+  onBlur: PropTypes.func,
+  /** Access input via ref */
+  inputRef: PropTypes.func,
   /** Fired when the search icon is clicked. */
   onRequestSearch: PropTypes.func.isRequired,
   /** Override the search icon. */
